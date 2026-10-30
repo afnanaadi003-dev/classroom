@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom - 1000 | Advanced Virtual LMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // SVG Icon Library
+        const Icon = ({ name, className = "w-5 h-5" }) => {
+            switch(name) {
+                case 'home': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>;
+                case 'book': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>;
+                case 'clipboard': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2m-6 9l2 2 4-4"/></svg>;
+                case 'chat': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>;
+                case 'chart': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>;
+                case 'sun': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>;
+                case 'moon': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>;
+                case 'bell': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>;
+                case 'user': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>;
+                case 'play': return <svg className={className} fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>;
+                case 'check': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>;
+                case 'upload': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>;
+                case 'search': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>;
+                case 'plus': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/></svg>;
+                case 'award': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>;
+                case 'file': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>;
+                case 'code': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>;
+                case 'trash': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>;
+                case 'thumbup': return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>;
+                default: return null;
+            }
+        };
+
+        // Initial Mock Data
+        const initialCourses = [
+            {
+                id: 'cs101',
+                title: 'Advanced Artificial Intelligence & Neural Networks',
+                category: 'Computer Science',
+                instructor: 'Prof. Alan Turing',
+                progress: 75,
+                enrolled: true,
+                rating: 4.9,
+                studentsCount: 1420,
+                image: 'https://placehold.co/600x400/4f46e5/ffffff?text=AI+Neural+Networks',
+                modules: [
+                    { id: 'm1', title: 'Introduction to Deep Learning', duration: '45m', completed: true, content: 'Deep learning is part of a broader family of machine learning methods based on artificial neural networks with representation learning.' },
+                    { id: 'm2', title: 'Convolutional Neural Networks (CNNs)', duration: '60m', completed: true, content: 'CNNs are regularized multilayer perceptrons. Multilayer perceptrons usually mean fully connected networks.' },
+                    { id: 'm3', title: 'Transformers & Large Language Models', duration: '90m', completed: false, content: 'Transformers rely on self-attention mechanisms to process sequential input data simultaneously rather than stepwise.' },
+                    { id: 'm4', title: 'AI Ethics and Future Horizons', duration: '50m', completed: false, content: 'Addressing bias, safety, alignment, and governance in autonomous AI systems.' }
+                ]
+            },
+            {
+                id: 'web202',
+                title: 'Full-Stack Web Development: React & Node.js',
+                category: 'Computer Science',
+                instructor: 'Dr. Grace Hopper',
+                progress: 40,
+                enrolled: true,
+                rating: 4.8,
+                studentsCount: 2350,
+                image: 'https://placehold.co/600x400/0ea5e9/ffffff?text=Full-Stack+React',
+                modules: [
+                    { id: 'w1', title: 'Advanced React Hooks & Context', duration: '50m', completed: true, content: 'Mastering useState, useEffect, useReducer, and custom hooks for scalable app architecture.' },
+                    { id: 'w2', title: 'State Management with Redux Toolkit', duration: '60m', completed: true, content: 'Managing complex global state securely and efficiently.' },
+                    { id: 'w3', title: 'Node.js & Express API Development', duration: '75m', completed: false, content: 'Building robust RESTful endpoints with middleware, auth, and database integrations.' },
+                    { id: 'w4', title: 'Deployment & CI/CD Pipelines', duration: '40m', completed: false, content: 'Deploying full-stack applications to cloud platforms with automated testing.' }
+                ]
+            },
+            {
+                id: 'his301',
+                title: 'Global History: Technological Revolutions',
+                category: 'History',
+                instructor: 'Dr. Ada Lovelace',
+                progress: 20,
+                enrolled: false,
+                rating: 4.7,
+                studentsCount: 980,
+                image: 'https://placehold.co/600x400/d97706/ffffff?text=Tech+Revolutions',
+                modules: [
+                    { id: 'h1', title: 'The First Industrial Revolution', duration: '55m', completed: false, content: 'Steam power, mechanization, and the transformation of global economies.' },
+                    { id: 'h2', title: 'Electricity & Mass Production', duration: '50m', completed: false, content: 'Assembly lines and the electrification of modern cities.' },
+                    { id: 'h3', title: 'The Digital Age & Silicon', duration: '65m', completed: false, content: 'Transistors, microprocessors, and the birth of personal computing.' }
+                ]
+            },
+            {
+                id: 'lit401',
+                title: 'Digital Humanities & Narrative Design',
+                category: 'Literature',
+                instructor: 'Prof. Margaret Hamilton',
+                progress: 0,
+                enrolled: false,
+                rating: 4.9,
+                studentsCount: 710,
+                image: 'https://placehold.co/600x400/10b981/ffffff?text=Digital+Humanities',
+                modules: [
+                    { id: 'l1', title: 'Interactive Storytelling Structures', duration: '40m', completed: false, content: 'Branching narratives, hypertexts, and player agency.' },
+                    { id: 'l2', title: 'Text Mining and Corpus Analysis', duration: '60m', completed: false, content: 'Using computational tools to analyze literary trends and language patterns.' }
+                ]
+            }
+        ];
+
+        const initialAssignments = [
+            { id: 'a1', courseId: 'cs101', title: 'Neural Networks Lab Quiz', type: 'quiz', dueDate: '2026-11-05 23:59', status: 'pending', score: null, totalQuestions: 3 },
+            { id: 'a2', courseId: 'web202', title: 'REST API & Authentication Project', type: 'upload', dueDate: '2026-11-08 18:00', status: 'pending', score: null },
+            { id: 'a3', courseId: 'his301', title: 'Industrial Revolution Essay', type: 'upload', dueDate: '2026-10-25 12:00', status: 'graded', score: '94/100' }
+        ];
+
+        const initialDiscussions = [
+            {
+                id: 'd1',
+                courseId: 'cs101',
+                author: 'Elena Rostova',
+                avatar: 'https://placehold.co/100x100/6366f1/ffffff?text=ER',
+                title: 'How does self-attention complexity scale in long sequences?',
+                content: 'I was reviewing the transformer architecture lecture and noticed quadratic scaling with sequence length ($O(N^2)$). Are there any efficient attention variants commonly used in production?',
+                timestamp: '2 hours ago',
+                upvotes: 14,
+                tags: ['AI', 'Transformers', 'Optimization'],
+                replies: [
+                    { id: 'r1', author: 'Prof. Alan Turing', avatar: 'https://placehold.co/100x100/4338ca/ffffff?text=AT', content: 'Great question Elena! Sparse attention, Linformer, and FlashAttention are standard techniques used to reduce memory footprint and compute to $O(N)$.', timestamp: '1 hour ago' }
+                ]
+            },
+            {
+                id: 'd2',
+                courseId: 'web202',
+                author: 'Marcus Chen',
+                avatar: 'https://placehold.co/100x100/0ea5e9/ffffff?text=MC',
+                title: 'React 19 Server Actions vs traditional REST endpoints',
+                content: 'When should we prefer React Server Actions over building dedicated Express API routes?',
+                timestamp: 'Yesterday',
+                upvotes: 8,
+                tags: ['React', 'FullStack', 'Architecture'],
+                replies: []
+            }
+        ];
+
+        const quizQuestions = {
+            'a1': [
+                {
+                    id: 'q1',
+                    question: 'What is the primary purpose of an activation function in a neural network?',
+                    options: [
+                        'To increase the file size of the model',
+                        'To introduce non-linearity into the network',
+                        'To normalize the learning rate automatically',
+                        'To convert weights into strings'
+                    ],
+                    correct: 1
+                },
+                {
+                    id: 'q2',
+                    question: 'Which architecture is most commonly used for computer vision tasks?',
+                    options: [
+                        'Recurrent Neural Network (RNN)',
+                        'Convolutional Neural Network (CNN)',
+                        'Simple Linear Regression',
+                        'K-Means Clustering'
+                    ],
+                    correct: 1
+                },
+                {
+                    id: 'q3',
+                    question: 'What mechanism revolutionized Natural Language Processing by capturing long-range dependencies?',
+                    options: ['Softmax', 'Self-Attention (Transformer)', 'Gradient Descent', 'Backpropagation'],
+                    correct: 1
+                }
+            ]
+        };
+
+        const App = () => {
+            // Persistent State
+            const [role, setRole] = useState(() => localStorage.getItem('c1000_role') || 'student');
+            const [theme, setTheme] = useState(() => localStorage.getItem('c1000_theme') || 'light');
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [courses, setCourses] = useState(() => {
+                const saved = localStorage.getItem('c1000_courses');
+                return saved ? JSON.parse(saved) : initialCourses;
+            });
+            const [assignments, setAssignments] = useState(() => {
+                const saved = localStorage.getItem('c1000_assignments');
+                return saved ? JSON.parse(saved) : initialAssignments;
+            });
+            const [discussions, setDiscussions] = useState(() => {
+                const saved = localStorage.getItem('c1000_discussions');
+                return saved ? JSON.parse(saved) : initialDiscussions;
+            });
+
+            // Modals & Navigation state
+            const [selectedCoursePlayer, setSelectedCoursePlayer] = useState(null);
+            const [activeLesson, setActiveLesson] = useState(null);
+            const [activeQuizId, setActiveQuizId] = useState(null);
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [quizResult, setQuizResult] = useState(null);
+            const [submissionModal, setSubmissionModal] = useState(null);
+            const [submissionFile, setSubmissionFile] = useState('');
+            const [newDiscussionModal, setNewDiscussionModal] = useState(false);
+            const [newDiscTitle, setNewDiscTitle] = useState('');
+            const [newDiscContent, setNewDiscContent] = useState('');
+            const [newDiscCategory, setNewDiscCategory] = useState('Computer Science');
+            const [toastMessage, setToastMessage] = useState(null);
+
+            // Save to localStorage
+            useEffect(() => {
+                localStorage.setItem('c1000_role', role);
+                localStorage.setItem('c1000_theme', theme);
+                localStorage.setItem('c1000_courses', JSON.stringify(courses));
+                localStorage.setItem('c1000_assignments', JSON.stringify(assignments));
+                localStorage.setItem('c1000_discussions', JSON.stringify(discussions));
+                
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }, [role, theme, courses, assignments, discussions]);
+
+            const showToast = (msg) => {
+                setToastMessage(msg);
+                setTimeout(() => setToastMessage(null), 3500);
+            };
+
+            const toggleTheme = () => {
+                setTheme(prev => prev === 'light' ? 'dark' : 'light');
+                showToast(`Switched to ${theme === 'light' ? 'Dark' : 'Light'} mode`);
+            };
+
+            const enrollCourse = (courseId) => {
+                setCourses(prev => prev.map(c => c.id === courseId ? { ...c, enrolled: true, progress: 10 } : c));
+                showToast('Successfully enrolled in course!');
+            };
+
+            const openCoursePlayer = (course) => {
+                setSelectedCoursePlayer(course);
+                setActiveLesson(course.modules[0]);
+                setActiveTab('player');
+            };
+
+            const toggleLessonComplete = (lessonId) => {
+                if (!selectedCoursePlayer) return;
+                const updatedModules = selectedCoursePlayer.modules.map(m => m.id === lessonId ? { ...m, completed: !m.completed } : m);
+                const completedCount = updatedModules.filter(m => m.completed).length;
+                const newProgress = Math.round((completedCount / updatedModules.length) * 100);
+
+                const updatedCourse = { ...selectedCoursePlayer, modules: updatedModules, progress: newProgress };
+                setSelectedCoursePlayer(updatedCourse);
+                setCourses(prev => prev.map(c => c.id === updatedCourse.id ? updatedCourse : c));
+                showToast('Lesson progress updated!');
+            };
+
+            // Gradebook Chart Effect
+            useEffect(() => {
+                if (activeTab === 'gradebook') {
+                    const ctx = document.getElementById('gpaChart');
+                    if (ctx) {
+                        if (window.gpaChartInstance) window.gpaChartInstance.destroy();
+                        window.gpaChartInstance = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: ['AI Neural Networks', 'Full-Stack React', 'Global History', 'Digital Humanities'],
+                                datasets: [{
+                                    label: 'Course Grade (%)',
+                                    data: [96, 88, 92, 85],
+                                    backgroundColor: ['#6366f1', '#0ea5e9', '#d97706', '#10b981'],
+                                    borderRadius: 8
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    y: { beginAtZero: true, max: 100 }
+                                }
+                            }
+                        });
+                    }
+                }
+            }, [activeTab]);
+
+            return (
+                <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+                    {/* Toast Notification */}
+                    {toastMessage && (
+                        <div className="fixed bottom-5 right-5 z-50 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce">
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                            <span className="font-medium text-sm">{toastMessage}</span>
+                        </div>
+                    )}
+
+                    {/* Top Header */}
+                    <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 px-6 py-3 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                                    🎓
+                                </div>
+                                <div>
+                                    <h1 className="font-bold text-lg tracking-tight bg-gradient-to-r from-brand-600 to-indigo-500 bg-clip-text text-transparent">Classroom - 1000</h1>
+                                    <p className="text-xs text-slate-400">Virtual Learning Management System</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Navigation Tabs */}
+                        <nav className="hidden md:flex items-center gap-1 bg-slate-100 dark:bg-slate-700/50 p-1 rounded-xl">
+                            {[
+                                { id: 'dashboard', label: 'Dashboard', icon: 'home' },
+                                { id: 'courses', label: 'Catalog', icon: 'book' },
+                                { id: 'assignments', label: 'Assignments', icon: 'clipboard' },
+                                { id: 'discussions', label: 'Discussions', icon: 'chat' },
+                                { id: 'gradebook', label: 'Gradebook', icon: 'chart' },
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                                        activeTab === tab.id
+                                            ? 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm'
+                                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                    }`}
+                                >
+                                    <Icon name={tab.icon} className="w-4 h-4" />
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </nav>
+
+                        {/* Right Controls */}
+                        <div className="flex items-center gap-3">
+                            {/* Role Switcher */}
+                            <div className="bg-slate-100 dark:bg-slate-700/50 p-1 rounded-xl flex items-center text-xs font-semibold">
+                                <button
+                                    onClick={() => { setRole('student'); showToast('Switched to Student View'); }}
+                                    className={`px-3 py-1.5 rounded-lg transition-all ${role === 'student' ? 'bg-brand-600 text-white shadow' : 'text-slate-600 dark:text-slate-300'}`}
+                                >
+                                    Student
+                                </button>
+                                <button
+                                    onClick={() => { setRole('instructor'); showToast('Switched to Instructor View'); }}
+                                    className={`px-3 py-1.5 rounded-lg transition-all ${role === 'instructor' ? 'bg-brand-600 text-white shadow' : 'text-slate-600 dark:text-slate-300'}`}
+                                >
+                                    Instructor
+                                </button>
+                            </div>
+
+                            {/* Theme Toggle */}
+                            <button
+                                onClick={toggleTheme}
+                                className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                                title="Toggle Theme"
+                            >
+                                <Icon name={theme === 'light' ? 'moon' : 'sun'} />
+                            </button>
+
+                            {/* User Profile avatar */}
+                            <div className="flex items-center gap-3 pl-2 border-l border-slate-200 dark:border-slate-700">
+                                <img src="https://placehold.co/100x100/6366f1/ffffff?text=AM" alt="Avatar" className="w-9 h-9 rounded-full ring-2 ring-brand-500/50" />
+                                <div className="hidden lg:block text-left">
+                                    <p className="text-sm font-bold leading-tight">Alex Mercer</p>
+                                    <p className="text-xs text-slate-400 capitalize">{role}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Content Area */}
+                    <main className="flex-1 max-w-7xl w-full mx-auto p-6">
+                        {/* ================= DASHBOARD TAB ================= */}
+                        {activeTab === 'dashboard' && (
+                            <div className="space-y-6">
+                                {/* Welcome Banner */}
+                                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 p-8 text-white shadow-xl">
+                                    <div className="relative z-10 max-w-2xl">
+                                        <span className="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                                            {role === 'instructor' ? 'Instructor Dashboard' : 'Semester Fall 2026'}
+                                        </span>
+                                        <h2 className="text-3xl font-extrabold mt-3">Welcome back, {role === 'instructor' ? 'Prof. Mercer' : 'Alex'}! 👋</h2>
+                                        <p className="text-brand-100 mt-2 text-sm leading-relaxed">
+                                            {role === 'instructor'
+                                                ? 'You have 4 pending assignment gradings and 2 active discussion threads requiring attention.'
+                                                : 'You have completed 75% of your AI Neural Networks module. Keep up the momentum to earn your badge.'}
+                                        </p>
+                                        <div className="mt-6 flex flex-wrap gap-3">
+                                            {role === 'student' ? (
+                                                <button onClick={() => setActiveTab('courses')} className="bg-white text-brand-600 px-5 py-2.5 rounded-xl font-semibold shadow hover:bg-slate-100 transition">
+                                                    Resume Learning
+                                                </button>
+                                            ) : (
+                                                <button onClick={() => setActiveTab('assignments')} className="bg-white text-brand-600 px-5 py-2.5 rounded-xl font-semibold shadow hover:bg-slate-100 transition">
+                                                    Grade Submissions
+                                                </button>
+                                            )}
+                                            <button onClick={() => setActiveTab('discussions')} className="bg-brand-700/60 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-brand-700 transition">
+                                                Join Q&A Board
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="absolute right-[-20px] bottom-[-40px] opacity-10 text-9xl font-black select-none">
+                                        🎓
+                                    </div>
+                                </div>
+
+                                {/* Metrics Summary */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                                    {[
+                                        { title: 'Active Courses', value: courses.filter(c => c.enrolled).length, change: '+1 this month', icon: 'book', color: 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600' },
+                                        { title: 'Assignments Due', value: assignments.filter(a => a.status === 'pending').length, change: 'Due this week', icon: 'clipboard', color: 'bg-amber-50 dark:bg-amber-950/50 text-amber-600' },
+                                        { title: 'Overall GPA / Progress', value: role === 'instructor' ? '4.8 Rating' : '3.85 / 4.0', change: 'Top 5% percentile', icon: 'award', color: 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600' },
+                                        { title: 'Completed Modules', value: '14 / 20', change: '70% Overall', icon: 'check', color: 'bg-blue-50 dark:bg-blue-950/50 text-blue-600' },
+                                    ].map((stat, idx) => (
+                                        <div key={idx} className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
+                                            <div>
+                                                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{stat.title}</p>
+                                                <h3 className="text-2xl font-bold mt-1">{stat.value}</h3>
+                                                <p className="text-xs text-emerald-500 font-medium mt-1">{stat.change}</p>
+                                            </div>
+                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${stat.color}`}>
+                                                <Icon name={stat.icon} className="w-6 h-6" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Enrolled Courses Grid / Quick Access */}
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="font-bold text-lg">My Enrolled Courses</h3>
+                                            <button onClick={() => setActiveTab('courses')} className="text-sm text-brand-600 dark:text-brand-400 font-semibold hover:underline">View All Catalog</button>
+                                        </div>
+                                        <div className="space-y-4">
+                                            {courses.filter(c => c.enrolled).map(course => (
+                                                <div key={course.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-700/30 border border-slate-100 dark:border-slate-700 gap-4">
+                                                    <div className="flex items-center gap-4">
+                                                        <img src={course.image} alt={course.title} className="w-16 h-16 rounded-xl object-cover" />
+                                                        <div>
+                                                            <span className="text-xs font-semibold text-brand-600 dark:text-brand-400">{course.category}</span>
+                                                            <h4 className="font-bold text-base">{course.title}</h4>
+                                                            <p className="text-xs text-slate-400">Instructor: {course.instructor}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="w-full sm:w-48 flex flex-col gap-1">
+                                                        <div className="flex justify-between text-xs font-semibold">
+                                                            <span>Progress</span>
+                                                            <span>{course.progress}%</span>
+                                                        </div>
+                                                        <div className="w-full bg-slate-200 dark:bg-slate-600 h-2 rounded-full overflow-hidden">
+                                                            <div className="bg-brand-600 h-full rounded-full transition-all duration-500" style={{ width: `${course.progress}%` }}></div>
+                                                        </div>
+                                                        <button onClick={() => openCoursePlayer(course)} className="mt-2 w-full bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold py-2 rounded-lg transition shadow">
+                                                            Continue Learning
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Upcoming Schedule & Notifications */}
+                                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                                        <div>
+                                            <h3 className="font-bold text-lg mb-4">Upcoming Deadlines</h3>
+                                            <div className="space-y-3">
+                                                {assignments.filter(a => a.status === 'pending').map(item => (
+                                                    <div key={item.id} className="p-3 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/20 flex items-start gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-950/50 text-amber-600 flex items-center justify-center shrink-0 font-bold text-xs">
+                                                            ⏰
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <h5 className="font-semibold text-sm">{item.title}</h5>
+                                                            <p className="text-xs text-slate-400 mt-0.5">Due: {item.dueDate}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
+                                            <div className="bg-indigo-50 dark:bg-indigo-950/30 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/50">
+                                                <h4 className="font-bold text-indigo-600 dark:text-indigo-400 text-sm">💡 AI Study Tip</h4>
+                                                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">Consistency beats intensity. Spend at least 30 minutes daily reviewing active module summaries.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ================= COURSE CATALOG TAB ================= */}
+                        {activeTab === 'courses' && (
+                            <div className="space-y-6">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <h2 className="text-2xl font-extrabold">Course Catalog</h2>
+                                        <p className="text-sm text-slate-400">Explore cutting-edge modules across disciplines</p>
+                                    </div>
+                                    <div className="relative w-full sm:w-72">
+                                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                            <Icon name="search" className="w-4 h-4" />
+                                        </span>
+                                        <input
+                                            type="text"
+                                            placeholder="Search courses..."
+                                            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                                    {courses.map(course => (
+                                        <div key={course.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col justify-between">
+                                            <div>
+                                                <div className="relative h-48 overflow-hidden">
+                                                    <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+                                                    <span className="absolute top-3 left-3 bg-slate-900/70 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full">
+                                                        {course.category}
+                                                    </span>
+                                                </div>
+                                                <div className="p-6">
+                                                    <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+                                                        <span>Instructor: {course.instructor}</span>
+                                                        <span className="flex items-center gap-1 font-bold text-amber-500">⭐ {course.rating}</span>
+                                                    </div>
+                                                    <h3 className="font-bold text-lg mb-2">{course.title}</h3>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400">{course.modules.length} Modules • {course.studentsCount} Students Enrolled</p>
+                                                </div>
+                                            </div>
+                                            <div className="p-6 pt-0">
+                                                {course.enrolled ? (
+                                                    <button onClick={() => openCoursePlayer(course)} className="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow">
+                                                        Continue Learning ({course.progress}%)
+                                                    </button>
+                                                ) : (
+                                                    <button onClick={() => enrollCourse(course.id)} className="w-full bg-slate-100 dark:bg-slate-700 hover:bg-brand-600 hover:text-white text-slate-800 dark:text-slate-100 font-semibold py-2.5 rounded-xl text-sm transition shadow-sm">
+                                                        Enroll Now Free
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ================= COURSE PLAYER TAB ================= */}
+                        {activeTab === 'player' && selectedCoursePlayer && (
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                                    <div className="flex items-center gap-3">
+                                        <button onClick={() => setActiveTab('courses')} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-sm font-semibold hover:bg-slate-200">
+                                            ← Back to Catalog
+                                        </button>
+                                        <div>
+                                            <h2 className="font-bold text-lg">{selectedCoursePlayer.title}</h2>
+                                            <p className="text-xs text-slate-400">Current Module: {activeLesson ? activeLesson.title : 'Select a lesson'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-semibold bg-brand-50 dark:bg-brand-950 text-brand-600 px-3 py-1.5 rounded-xl">
+                                            Progress: {selectedCoursePlayer.progress}%
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    {/* Video / Content Player */}
+                                    <div className="lg:col-span-2 space-y-6">
+                                        <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-2xl aspect-video relative flex flex-col items-center justify-center text-white">
+                                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/40"></div>
+                                            <div className="relative z-10 text-center p-6">
+                                                <div className="w-16 h-16 rounded-full bg-brand-600/90 flex items-center justify-center mx-auto mb-4 cursor-pointer hover:scale-105 transition shadow-lg">
+                                                    <Icon name="play" className="w-8 h-8 text-white ml-1" />
+                                                </div>
+                                                <h3 className="font-bold text-xl">{activeLesson ? activeLesson.title : 'Select Lesson'}</h3>
+                                                <p className="text-xs text-slate-300 mt-1">Virtual Lecture Stream • HD 1080p</p>
+                                            </div>
+                                            <div className="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between text-xs text-slate-300 bg-slate-900/60 backdrop-blur-md px-4 py-2.5 rounded-xl">
+                                                <span>⏱ {activeLesson ? activeLesson.duration : '0m'}</span>
+                                                <div className="flex items-center gap-3">
+                                                    <span>CC</span>
+                                                    <span>⚙️ Settings</span>
+                                                    <span>⛶ Fullscreen</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Lesson Notes & Interactive Exercise */}
+                                        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                                            <h3 className="font-bold text-lg">Lesson Content & Notes</h3>
+                                            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                                                {activeLesson ? activeLesson.content : 'Please select a lesson from the syllabus sidebar to begin learning.'}
+                                            </p>
+                                            <div className="pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                                                <button
+                                                    onClick={() => toggleLessonComplete(activeLesson.id)}
+                                                    className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition flex items-center gap-2 ${
+                                                        activeLesson && activeLesson.completed
+                                                            ? 'bg-emerald-500 text-white shadow'
+                                                            : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-brand-600 hover:text-white'
+                                                    }`}
+                                                >
+                                                    <Icon name="check" className="w-4 h-4" />
+                                                    {activeLesson && activeLesson.completed ? 'Completed ✓' : 'Mark as Completed'}
+                                                </button>
+                                                <button onClick={() => showToast('Notes downloaded successfully!')} className="text-xs text-brand-600 dark:text-brand-400 font-semibold flex items-center gap-1 hover:underline">
+                                                    <Icon name="file" className="w-4 h-4" /> Download PDF Notes
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Syllabus Sidebar */}
+                                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm h-fit space-y-4">
+                                        <h3 className="font-bold text-lg">Course Syllabus</h3>
+                                        <div className="space-y-2">
+                                            {selectedCoursePlayer.modules.map((mod, idx) => (
+                                                <div
+                                                    key={mod.id}
+                                                    onClick={() => setActiveLesson(mod)}
+                                                    className={`p-3.5 rounded-xl border cursor-pointer transition flex items-center justify-between ${
+                                                        activeLesson?.id === mod.id
+                                                            ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-950/30'
+                                                            : 'border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${mod.completed ? 'bg-emerald-500 text-white' : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300'}`}>
+                                                            {idx + 1}
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-semibold text-sm">{mod.title}</h4>
+                                                            <span className="text-xs text-slate-400">{mod.duration}</span>
+                                                        </div>
+                                                    </div>
+                                                    {mod.completed && <span className="text-emerald-500 font-bold">✓</span>}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ================= ASSIGNMENTS & QUIZ PORTAL TAB ================= */}
+                        {activeTab === 'assignments' && (
+                            <div className="space-y-6">
+                                <div>
+                                    <h2 className="text-2xl font-extrabold">Assignments & Quiz Portal</h2>
+                                    <p className="text-sm text-slate-400">Complete coursework, test your knowledge, and submit projects</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {assignments.map(item => (
+                                        <div key={item.id} className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                                            <div>
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <span className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600">
+                                                        {item.type === 'quiz' ? 'Interactive Quiz' : 'Project Upload'}
+                                                    </span>
+                                                    <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
+                                                        item.status === 'graded' ? 'bg-emerald-100 text-emerald-700' :
+                                                        item.status === 'submitted' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
+                                                    }`}>
+                                                        {item.status.toUpperCase()} {item.score ? `(${item.score})` : ''}
+                                                    </span>
+                                                </div>
+                                                <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+                                                <p className="text-xs text-slate-400 mb-4">Deadline: {item.dueDate}</p>
+                                            </div>
+                                            <div>
+                                                {item.type === 'quiz' ? (
+                                                    <button
+                                                        onClick={() => { setActiveQuizId(item.id); setQuizAnswers({}); setQuizResult(null); }}
+                                                        className="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow"
+                                                    >
+                                                        Start Quiz Runner 🚀
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => setSubmissionModal(item)}
+                                                        className="w-full bg-slate-100 dark:bg-slate-700 hover:bg-brand-600 hover:text-white text-slate-800 dark:text-slate-100 font-semibold py-2.5 rounded-xl text-sm transition"
+                                                    >
+                                                        Submit Assignment 📂
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Quiz Runner Modal */}
+                                {activeQuizId && (
+                                    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                                        <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+                                            <div className="flex items-center justify-between border-b pb-4 dark:border-slate-700">
+                                                <div>
+                                                    <h3 className="font-bold text-xl">Interactive Quiz Runner</h3>
+                                                    <p className="text-xs text-slate-400">Answer all questions to receive instant scoring</p>
+                                                </div>
+                                                <button onClick={() => setActiveQuizId(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+                                            </div>
+
+                                            {quizResult !== null ? (
+                                                <div className="text-center py-8 space-y-4">
+                                                    <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl font-bold">
+                                                        🏆
+                                                    </div>
+                                                    <h4 className="text-2xl font-extrabold">Quiz Completed!</h4>
+                                                    <p className="text-lg font-medium">Your Score: <span className="text-brand-600 font-bold">{quizResult} / 3</span></p>
+                                                    <p className="text-xs text-slate-400">Great job! Your grade has been logged in the gradebook.</p>
+                                                    <button onClick={() => setActiveQuizId(null)} className="bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold shadow">
+                                                        Close Quiz
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-6">
+                                                    {quizQuestions[activeQuizId]?.map((q, qIndex) => (
+                                                        <div key={q.id} className="space-y-3">
+                                                            <h4 className="font-bold text-sm">{qIndex + 1}. {q.question}</h4>
+                                                            <div className="space-y-2">
+                                                                {q.options.map((opt, optIndex) => (
+                                                                    <label key={optIndex} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${quizAnswers[q.id] === optIndex ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-950/40' : 'border-slate-200 dark:border-slate-700'}`}>
+                                                                        <input
+                                                                            type="radio"
+                                                                            name={q.id}
+                                                                            checked={quizAnswers[q.id] === optIndex}
+                                                                            onChange={() => setQuizAnswers({ ...quizAnswers, [q.id]: optIndex })}
+                                                                            className="text-brand-600"
+                                                                        />
+                                                                        <span className="text-sm">{opt}</span>
+                                                                    </label>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    <button
+                                                        onClick={() => {
+                                                            let score = 0;
+                                                            const questions = quizQuestions[activeQuizId];
+                                                            questions.forEach(q => {
+                                                                if (quizAnswers[q.id] === q.correct) score++;
+                                                            });
+                                                            setQuizResult(score);
+                                                            showToast(`Quiz submitted! Score: ${score}/3`);
+                                                        }}
+                                                        className="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-xl transition shadow-lg"
+                                                    >
+                                                        Submit Quiz Now
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Assignment Submission Modal */}
+                                {submissionModal && (
+                                    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                                        <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-6">
+                                            <div className="flex items-center justify-between border-b pb-4 dark:border-slate-700">
+                                                <h3 className="font-bold text-lg">Submit Assignment</h3>
+                                                <button onClick={() => setSubmissionModal(null)} className="text-slate-400 font-bold">✕</button>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <p className="text-sm font-semibold">{submissionModal.title}</p>
+                                                <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl p-6 text-center space-y-2">
+                                                    <Icon name="upload" className="w-8 h-8 text-brand-500 mx-auto" />
+                                                    <p className="text-xs font-medium">Drag & drop project file or click to browse</p>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Enter file name (e.g. project_v2.zip)"
+                                                        value={submissionFile}
+                                                        onChange={(e) => setSubmissionFile(e.target.value)}
+                                                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border rounded-xl text-xs mt-2"
+                                                    />
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        setAssignments(prev => prev.map(a => a.id === submissionModal.id ? { ...a, status: 'submitted' } : a));
+                                                        setSubmissionModal(null);
+                                                        showToast('Assignment submitted successfully!');
+                                                    }}
+                                                    className="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-xl transition shadow"
+                                                >
+                                                    Confirm Submission
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* ================= INTERACTIVE DISCUSSION TAB ================= */}
+                        {activeTab === 'discussions' && (
+                            <div className="space-y-6">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <h2 className="text-2xl font-extrabold">Q&A Discussion Whiteboard</h2>
+                                        <p className="text-sm text-slate-400">Collaborate with peers, ask questions, and engage with instructors</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setNewDiscussionModal(true)}
+                                        className="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow flex items-center gap-2"
+                                    >
+                                        <Icon name="plus" className="w-4 h-4" /> Ask Question
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {discussions.map(disc => (
+                                        <div key={disc.id} className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <img src={disc.avatar} alt={disc.author} className="w-10 h-10 rounded-full" />
+                                                    <div>
+                                                        <h4 className="font-bold text-sm">{disc.author}</h4>
+                                                        <p className="text-xs text-slate-400">{disc.timestamp}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    {disc.tags.map((t, idx) => (
+                                                        <span key={idx} className="text-xs bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-full font-medium">{t}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-base mb-1">{disc.title}</h3>
+                                                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{disc.content}</p>
+                                            </div>
+                                            <div className="flex items-center gap-4 pt-2 border-t border-slate-100 dark:border-slate-700 text-xs font-semibold text-slate-500">
+                                                <button
+                                                    onClick={() => {
+                                                        setDiscussions(prev => prev.map(d => d.id === disc.id ? { ...d, upvotes: d.upvotes + 1 } : d));
+                                                    }}
+                                                    className="flex items-center gap-1.5 hover:text-brand-600"
+                                                >
+                                                    <Icon name="thumbup" className="w-4 h-4" /> {disc.upvotes} Upvotes
+                                                </button>
+                                                <span>💬 {disc.replies.length} Replies</span>
+                                            </div>
+
+                                            {/* Replies list */}
+                                            {disc.replies.length > 0 && (
+                                                <div className="pl-6 border-l-2 border-brand-500/30 space-y-3 mt-4">
+                                                    {disc.replies.map(rep => (
+                                                        <div key={rep.id} className="bg-slate-50 dark:bg-slate-700/30 p-4 rounded-xl space-y-1">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="font-bold text-xs text-brand-600 dark:text-brand-400">{rep.author}</span>
+                                                                <span className="text-xs text-slate-400">{rep.timestamp}</span>
+                                                            </div>
+                                                            <p className="text-xs text-slate-600 dark:text-slate-300">{rep.content}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* New Discussion Modal */}
+                                {newDiscussionModal && (
+                                    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                                        <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-8 shadow-2xl space-y-4">
+                                            <div className="flex items-center justify-between border-b pb-4 dark:border-slate-700">
+                                                <h3 className="font-bold text-lg">Post to Discussion Board</h3>
+                                                <button onClick={() => setNewDiscussionModal(false)} className="text-slate-400 font-bold">✕</button>
+                                            </div>
+                                            <div className="space-y-3">
+                                                <label className="text-xs font-semibold">Title / Question</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="What's on your mind?"
+                                                    value={newDiscTitle}
+                                                    onChange={e => setNewDiscTitle(e.target.value)}
+                                                    className="w-full p-3 bg-slate-50 dark:bg-slate-700 border rounded-xl text-sm"
+                                                />
+                                                <label className="text-xs font-semibold">Details & Code Snippet</label>
+                                                <textarea
+                                                    rows="4"
+                                                    placeholder="Provide context..."
+                                                    value={newDiscContent}
+                                                    onChange={e => setNewDiscContent(e.target.value)}
+                                                    className="w-full p-3 bg-slate-50 dark:bg-slate-700 border rounded-xl text-sm"
+                                                ></textarea>
+                                                <button
+                                                    onClick={() => {
+                                                        if (!newDiscTitle) return;
+                                                        const newPost = {
+                                                            id: 'd' + Date.now(),
+                                                            courseId: 'cs101',
+                                                            author: 'Alex Mercer',
+                                                            avatar: 'https://placehold.co/100x100/6366f1/ffffff?text=AM',
+                                                            title: newDiscTitle,
+                                                            content: newDiscContent,
+                                                            timestamp: 'Just now',
+                                                            upvotes: 1,
+                                                            tags: [newDiscCategory],
+                                                            replies: []
+                                                        };
+                                                        setDiscussions([newPost, ...discussions]);
+                                                        setNewDiscussionModal(false);
+                                                        setNewDiscTitle('');
+                                                        setNewDiscContent('');
+                                                        showToast('Question posted successfully!');
+                                                    }}
+                                                    className="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-xl transition shadow mt-2"
+                                                >
+                                                    Publish Post
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* ================= GRADEBOOK & ANALYTICS TAB ================= */}
+                        {activeTab === 'gradebook' && (
+                            <div className="space-y-6">
+                                <div>
+                                    <h2 className="text-2xl font-extrabold">Gradebook & Analytics</h2>
+                                    <p className="text-sm text-slate-400">Visual progress tracking, GPA analytics, and earned achievement badges</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    {/* Chart */}
+                                    <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                                        <h3 className="font-bold text-lg">Course Grade Breakdown</h3>
+                                        <div className="h-72">
+                                            <canvas id="gpaChart"></canvas>
+                                        </div>
+                                    </div>
+
+                                    {/* Achievement Badges */}
+                                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                                        <h3 className="font-bold text-lg">Achievement Badges 🏆</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {[
+                                                { title: 'AI Pioneer', desc: 'Completed neural network milestone', icon: '🤖' },
+                                                { title: 'Code Ninja', desc: 'Submitted 5 full-stack apps', icon: '💻' },
+                                                { title: 'Top Contributor', desc: '10+ upvoted Q&A answers', icon: '⭐' },
+                                                { title: 'Streak Master', desc: '7 days active streak', icon: '🔥' },
+                                            ].map((badge, idx) => (
+                                                <div key={idx} className="bg-slate-50 dark:bg-slate-700/30 p-4 rounded-xl border border-slate-100 dark:border-slate-700 text-center space-y-1">
+                                                    <div className="text-3xl">{badge.icon}</div>
+                                                    <h4 className="font-bold text-xs mt-1">{badge.title}</h4>
+                                                    <p className="text-[10px] text-slate-400">{badge.desc}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-6 px-6 text-center text-xs text-slate-400">
+                        <p>© 2026 Classroom - 1000 Virtual Learning Management System. All rights reserved.</p>
+                    </footer>
+                </div>
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
